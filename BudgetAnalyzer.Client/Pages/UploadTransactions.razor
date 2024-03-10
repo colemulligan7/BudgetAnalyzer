@@ -1,0 +1,28 @@
+﻿@page "/uploadTransactions"
+@using BudgetAnalyzer.Client.Data;
+@inject IFileService fileService;
+
+<PageTitle>Upload Transactions</PageTitle>
+
+<MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".csv" FilesChanged="UploadFiles">
+    <ButtonTemplate>
+        <MudButton HtmlTag="label"
+                   Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.CloudUpload"
+                   for="@context.Id">
+            Upload Transactions
+        </MudButton>
+    </ButtonTemplate>
+</MudFileUpload>
+@code {
+    IList<IBrowserFile> files = new List<IBrowserFile>();
+    private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            await fileService.UploadTransactions(file);
+        }
+        //TODO upload the files to the server
+    }
+}

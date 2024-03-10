@@ -1,0 +1,25 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+
+    <main>
+
+
+
+        <MudThemeProvider @rendermode="InteractiveAuto" IsDarkMode="true"/>
+        <MudDialogProvider @rendermode="InteractiveAuto" />
+        <MudSnackbarProvider @rendermode="InteractiveAuto" />
+
+        <MudLayout>
+            <NavMenu />
+            <MudMainContent>
+                @Body
+            </MudMainContent>
+        </MudLayout>
+    </main>
+</div>
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

@@ -1,5 +1,6 @@
 ﻿@page "/uploadTransactions"
 @using BudgetAnalyzer.Client.Data;
+@using BudgetAnalyzer.Client.Data.Interfaces;
 @inject IFileService fileService;
 
 <PageTitle>Upload Transactions</PageTitle>
@@ -21,7 +22,7 @@
     {
         foreach (var file in files)
         {
-            await fileService.UploadTransactions(file);
+            await fileService.UploadTransactions(file,0);
         }
         //TODO upload the files to the server
     }

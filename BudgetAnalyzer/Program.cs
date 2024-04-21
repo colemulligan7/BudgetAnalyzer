@@ -1,6 +1,9 @@
-using BudgetAnalyzer.Client.Pages;
+using BudgetAnalyzer.Client.Data.Interfaces;
+using BudgetAnalyzer.Client.Data;
 using BudgetAnalyzer.Components;
 using BudgetAnalyzer.Data;
+using BudgetAnalyzer.Services.Interfaces;
+using BudgetAnalyzer.Services.Logic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -10,8 +13,17 @@ using MudBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContextFactory<OnlineDbContext>(options =>
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddTransient<BudgetAnalyzer.Services.Interfaces.ITransactionService, BudgetAnalyzer.Services.Logic.TransactionService>();
+
+builder.Services.AddHttpClient<IFileService, FileService>(client => {
+    client.BaseAddress = new Uri("http://localhost:5137");
+});
+builder.Services.AddHttpClient<BudgetAnalyzer.Client.Data.Interfaces.ITransactionService, BudgetAnalyzer.Client.Data.TransactionService>(client => {
+    client.BaseAddress = new Uri("http://localhost:5137");
+});
+
 var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
@@ -55,4 +67,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BudgetAnalyzer.Client._Imports).Assembly);
 
-app.Run();
+await app.RunAsync();

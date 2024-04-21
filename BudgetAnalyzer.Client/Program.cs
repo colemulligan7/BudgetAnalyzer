@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using BudgetAnalyzer.Client.Data;
+using BudgetAnalyzer.Client.Data.Interfaces;
 
 public class Program
 {
@@ -17,19 +18,16 @@ public class Program
     {
         var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-        builder.Services.AddScoped(sp =>
-            new HttpClient
-            {
-                BaseAddress = new Uri("http://localhost:5137")
-            });
-        builder.Services.AddMudServices();
         builder.Services.AddHttpClient<IFileService, FileService>(client => {
             client.BaseAddress = new Uri("http://localhost:5137");
         });
-        var app = builder.Build();
+        builder.Services.AddHttpClient<ITransactionService, TransactionService>(client => {
+            client.BaseAddress = new Uri("http://localhost:5137");
+        });
+        builder.Services.AddMudServices();
+        builder.Services.AddScoped<MudBlazor.DialogService>();
 
 
-
-        await app.RunAsync();
+        await builder.Build().RunAsync();
     }
 }

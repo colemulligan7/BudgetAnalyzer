@@ -1,10 +1,11 @@
-﻿using CsvHelper;
+﻿using BudgetAnalyzer.Shared.Models;
+using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 
 namespace BudgetAnalyzer.CsvMapping
 {
-    public class TransactionMap : ClassMap<TransactionCsv>
+    public class TransactionMap : ClassMap<Transaction>
     {
         public TransactionMap() {
 

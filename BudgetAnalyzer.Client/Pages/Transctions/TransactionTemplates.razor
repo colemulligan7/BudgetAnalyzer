@@ -1,0 +1,38 @@
+﻿@page "/transactionFileTemplates"
+@using BudgetAnalyzer.Client.Data;
+@using BudgetAnalyzer.Client.Data.Interfaces;
+@using BudgetAnalyzer.Shared.Models;
+@inject IDialogService DialogService
+@inject ITransactionService transactionService;
+
+<MudDataGrid Items="@Elements">
+    <Columns>
+        <PropertyColumn Property="x => x.TransactionDate"/>
+        <PropertyColumn Property="x => x.Description" />
+        <PropertyColumn Property="x => x.AmountPaid" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton Size="@Size.Small" Variant="@Variant.Filled" Color="@Color.Primary">Edit</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+<MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
+    Open Simple Dialog
+</MudButton>
+
+@code {
+    private List<string> _events = new();
+    private IEnumerable<TransactionFileMapping> Elements = new List<TransactionFileMapping>();
+
+    private void OpenDialog()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<CreateTransactionDialog>("Simple Dialog", options);
+    }
+
+    protected override async Task OnInitializedAsync() => Elements = await transactionService.GetTransactionTemplates();
+}

@@ -18,21 +18,23 @@ namespace BudgetAnalyzer.Services.Logic
         {
             foreach (var transaction in transactions)
             {
-                var matchingTransaction = _context.Transactions.Where(x => x.Amount == transaction.Amount
+                var matchingTransaction = _context.Transactions.Where(x => x.AmountPaid == transaction.AmountPaid
                                                 && x.Description == transaction.Description
                                                 && x.DateOfTransaction == transaction.DateOfTransaction).FirstOrDefault();
 
 
                 if (matchingTransaction == null)
                 {
-                    _context.Update(transaction);
+                    _context.Transactions.Add(transaction);
+                    _context.SaveChanges();
+
                     var categorySearch = _context.CategorySearch.Where(x => transaction.Description.Contains(x.SearchTerm));
 
 
                     var newAllocation = new Allocation()
                     {
                         Description = transaction.Description,
-                        Amount = transaction.Amount,
+                        Amount = transaction.AmountPaid,
                         Transaction = transaction
 
                     };

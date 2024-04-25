@@ -9,7 +9,10 @@ namespace BudgetAnalyzer.Shared.Models
         public long Id { get; set; }
 
         [Column(TypeName = "decimal(19,4)")]
-        public decimal Amount { get; set; }
+        public decimal AmountPaid { get; set; }
+        
+        [Column(TypeName = "decimal(19,4)")]
+        public decimal AmountReceived { get; set; }
 
         public required string Description { get; set; }
 

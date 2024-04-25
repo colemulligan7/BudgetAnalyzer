@@ -9,8 +9,8 @@ namespace BudgetAnalyzer.CsvMapping
     {
         public TransactionMap() {
 
-            Map(m => m.DateOfTransaction).Name("Date");
-            Map(m => m.Amount).Name("Amount").TypeConverter<CustomDecimalConverter>();
+            Map(m => m.DateOfTransaction).Name("TransactionDate");
+            Map(m => m.AmountPaid).Name("AmountPaid").TypeConverter<CustomDecimalConverter>();
             Map(m => m.Description).Name("Description");
         }
     }

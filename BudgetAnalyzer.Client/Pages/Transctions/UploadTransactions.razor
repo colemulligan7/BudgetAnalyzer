@@ -1,29 +1,102 @@
 ﻿@page "/uploadTransactions"
 @using BudgetAnalyzer.Client.Data;
 @using BudgetAnalyzer.Client.Data.Interfaces;
+@using BudgetAnalyzer.Shared.Models
 @inject IFileService fileService;
+@inject ITransactionService transactionService;
 
 <PageTitle>Upload Transactions</PageTitle>
+<MudGrid>
+    <MudItem xs="0" sm="3" lg="4"></MudItem>
+    <MudItem xs="12" sm="6" lg="4">
+        <MudCard>
+            <MudCardContent>
+                <MudSelect T="long" Label="Mapping Template" @bind-Value="@TransactionFileMappingId" AdornmentColor="Color.Secondary" Variant="Variant.Outlined">
+                    @foreach (TransactionFileMapping map in TransactionMaps)
+                    {
+                        <MudSelectItem Value="@map.Id">@map.Name</MudSelectItem>
+                    }
+                </MudSelect>
 
-<MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".csv" FilesChanged="UploadFiles">
-    <ButtonTemplate>
-        <MudButton HtmlTag="label"
-                   Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.CloudUpload"
-                   for="@context.Id">
-            Upload Transactions
-        </MudButton>
-    </ButtonTemplate>
-</MudFileUpload>
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" Accept=".csv" OnFilesChanged="OnFilesChanged"
+                               Hidden="@false"
+                               InputClass="absolute mud-width-full mud-height-full overflow-hidden z-20"
+                               InputStyle="opacity:0"
+                               @ondragenter="@SetDragClass"
+                               @ondragleave="@ClearDragClass"
+                               @ondragend="@ClearDragClass">
+
+                    <ButtonTemplate>
+                        <MudPaper Height="300px"
+                                  Outlined="true">
+                            <MudText Typo="Typo.h6">
+                                Drag and drop files here or click
+                            </MudText>
+                            @foreach (var file in _fileNames)
+                            {
+                                <MudChip Color="Color.Dark" Text="@file" />
+                            }
+                        </MudPaper>
+                        <MudToolBar DisableGutters="true" Class="relative d-flex justify-end gap-4 z-30">
+                            <MudButton HtmlTag="label"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.CloudUpload"
+                                       for="@context.Id">
+                                Add Transaction File
+                            </MudButton>
+                            <MudButton OnClick="@Submit"
+                                       Color="Color.Primary"
+                                       Variant="Variant.Filled">
+                                Submit
+                            </MudButton>
+                        </MudToolBar>
+                    </ButtonTemplate>
+                </MudFileUpload>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
 @code {
+    private IEnumerable<TransactionFileMapping> TransactionMaps = new List<TransactionFileMapping>();
+    private long TransactionFileMappingId = 0L;
+    private readonly List<string> _fileNames = new();
     IList<IBrowserFile> files = new List<IBrowserFile>();
-    private async void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full z-10";
+    private string _dragClass = DefaultDragClass;
+
+
+    protected override async Task OnInitializedAsync()
     {
+        TransactionMaps = await transactionService.GetTransactionTemplates();
+        TransactionFileMappingId = TransactionMaps.FirstOrDefault()?.Id ?? 0L;
+        StateHasChanged();
+    }
+
+    private void OnFilesChanged(InputFileChangeEventArgs e)
+    {
+        var uploadedFiles = e.GetMultipleFiles();
+        foreach (var file in uploadedFiles)
+        {
+            _fileNames.Add(file.Name);
+            files.Add(file);
+        }
+    }
+
+    private async void Submit()
+    {
+
         foreach (var file in files)
         {
-            await fileService.UploadTransactions(file,0);
+            await fileService.UploadTransactions(file, TransactionFileMappingId);
         }
         //TODO upload the files to the server
     }
+
+    private void SetDragClass()
+        => _dragClass = $"{DefaultDragClass} mud-border-primary";
+
+    private void ClearDragClass()
+        => _dragClass = DefaultDragClass;
+
 }

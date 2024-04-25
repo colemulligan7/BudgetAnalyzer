@@ -34,8 +34,6 @@ namespace BudgetAnalyzer.Client.Data
 
             _httpClient.DefaultRequestHeaders.Add("TransactionFileMappingId", transactionFileMappingId.ToString());
 
-
-
             var test = await _httpClient.PostAsync("api/Files/UploadTransactions", form);
             Console.WriteLine(test);
         }

@@ -4,6 +4,7 @@ using BudgetAnalyzer.Services.Logic;
 using BudgetAnalyzer.Shared.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -18,7 +19,7 @@ namespace BudgetAnalyzer.Controllers
 
         private readonly ITransactionService _transactionService;
 
-        public FilesController(TransactionService transactionService)
+        public FilesController(ITransactionService transactionService)
         {
             _transactionService = transactionService;
         }
@@ -27,7 +28,7 @@ namespace BudgetAnalyzer.Controllers
         [Route("UploadTransactions")]
         public async Task<IActionResult> UploadTransactions([FromForm] IEnumerable<IFormFile> files)
         {
-            var mappingDictionary = new Dictionary<string, string?>();
+            var mappingDictionary = new Dictionary<string, string>();
             if (Request.Headers["TransactionFileMappingId"].Count > 0)
             {
                 if (long.TryParse(Request.Headers["TransactionFileMappingId"], out long result))
@@ -35,10 +36,16 @@ namespace BudgetAnalyzer.Controllers
                     var mapping = _transactionService.GetTransactionFileMappingTemplate(result);
                     if (mapping != null)
                     {
-                        mappingDictionary.Add("TransactionDate", mapping.TransactionDate);
+                        mappingDictionary.Add("DateOfTransaction", mapping.TransactionDate);
                         mappingDictionary.Add("Description", mapping.Description);
-                        mappingDictionary.Add("AmountPaid", mapping.AmountPaid);
-
+                        if (!string.IsNullOrEmpty(mapping.AmountPaid))
+                        {
+                            mappingDictionary.Add("AmountPaid", mapping.AmountPaid ?? "");
+                        }
+                        if (!string.IsNullOrEmpty(mapping.AmountReceived))
+                        {
+                            mappingDictionary.Add("AmountReceived", mapping.AmountReceived ?? "");
+                        }
                     }
                 }
                 else
@@ -47,7 +54,10 @@ namespace BudgetAnalyzer.Controllers
                 }
 
             }
-
+            if (mappingDictionary.Count == 0 || mappingDictionary == null)
+            {
+                return NotFound();
+            }
 
 
             foreach (var file in files)
@@ -56,11 +66,11 @@ namespace BudgetAnalyzer.Controllers
                 using (StreamReader sr = new StreamReader(stream))
                 using (var csv = new CsvReader(sr, CultureInfo.InvariantCulture))
                 {
-                    var transactionMap = new DefaultClassMap<TransactionMap>();
+                    var transactionMap = new DefaultClassMap<Transaction>();
 
+                    transactionMap.Map(mappingDictionary);
 
-
-                    csv.Context.RegisterClassMap<TransactionMap>();
+                    csv.Context.RegisterClassMap(transactionMap);
                     var records = csv.GetRecords<Transaction>();
                     await _transactionService.ProcessTransactions(records);
 
@@ -70,6 +80,7 @@ namespace BudgetAnalyzer.Controllers
             return Ok();
         }
     }
+
     public static class CsvHelperExtensions
     {
         public static void Map<T>(this ClassMap<T> classMap, IDictionary<string, string> csvMappings)
@@ -82,8 +93,31 @@ namespace BudgetAnalyzer.Controllers
                 {
                     throw new ArgumentException($"Class {typeof(T).Name} does not have a property named {mapping.Key}");
                 }
+                
+                if (property.PropertyType == typeof(decimal))
+                {
+                    classMap.Map(typeof(T), property).Name(mapping.Value).TypeConverter<CustomDecimalConverter>();
+                }
+                else
+                {
+                    classMap.Map(typeof(T), property).Name(mapping.Value);
+                }
+            }
+        }
 
-                classMap.Map(typeof(T), property).Name(mapping.Value);
+        public class CustomDecimalConverter : DecimalConverter
+        {
+            public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+            {
+                text = text.Replace("$", "").Replace("(", "-").Replace(")", "");
+                if (decimal.TryParse(text, out var result))
+                {
+                    return result;
+                }
+                else
+                {
+                    return decimal.Zero;
+                }
             }
         }
     }

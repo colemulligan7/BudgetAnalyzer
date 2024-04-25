@@ -5,11 +5,13 @@
 @inject IDialogService DialogService
 @inject ITransactionService transactionService;
 
-<MudDataGrid Items="@Elements">
+<MudDataGrid Items="@TransactionMaps">
     <Columns>
-        <PropertyColumn Property="x => x.TransactionDate"/>
+        <PropertyColumn Property="x => x.Name"/>
+        <PropertyColumn Property="x => x.TransactionDate" Title="Transaction Date"/>
         <PropertyColumn Property="x => x.Description" />
-        <PropertyColumn Property="x => x.AmountPaid" />
+        <PropertyColumn Property="x => x.AmountPaid" Title="Amount Paid"/>
+        <PropertyColumn Property="x => x.AmountReceived" Title="Amount Received"/>
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>
@@ -19,14 +21,14 @@
         </TemplateColumn>
     </Columns>
 </MudDataGrid>
-
+<br />
 <MudButton @onclick="OpenDialog" Variant="Variant.Filled" Color="Color.Primary">
-    Open Simple Dialog
+    Create Transaction Mapping
 </MudButton>
 
 @code {
     private List<string> _events = new();
-    private IEnumerable<TransactionFileMapping> Elements = new List<TransactionFileMapping>();
+    private IEnumerable<TransactionFileMapping> TransactionMaps = new List<TransactionFileMapping>();
 
     private void OpenDialog()
     {
@@ -34,5 +36,5 @@
         DialogService.Show<CreateTransactionDialog>("Simple Dialog", options);
     }
 
-    protected override async Task OnInitializedAsync() => Elements = await transactionService.GetTransactionTemplates();
+    protected override async Task OnInitializedAsync() => TransactionMaps = await transactionService.GetTransactionTemplates();
 }

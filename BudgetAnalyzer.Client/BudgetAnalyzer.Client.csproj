@@ -10,10 +10,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+	  <ProjectReference Include="..\BudgetAnalyzer.Shared\BudgetAnalyzer.Shared.csproj" />
     <PackageReference Include="Bit.Besql" Version="8.7.6" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="MudBlazor" Version="6.17.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
 </Project>

@@ -4,10 +4,10 @@ using Microsoft.Extensions.Options;
 
 namespace BudgetAnalyzer.Data
 {
-    public class OnlineDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public OnlineDbContext(
-            DbContextOptions<OnlineDbContext> options) : base(options)
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
@@ -20,6 +20,11 @@ namespace BudgetAnalyzer.Data
         public DbSet<GoalRange> Goals { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
+
+        public DbSet<TransactionFileMapping> TransactionFileMappings { get; set; }
+
+        public DbSet<CategorySearch> CategorySearch { get; set; }
+
 
     }
 }

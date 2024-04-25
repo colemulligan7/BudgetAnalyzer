@@ -1,15 +1,16 @@
-﻿using CsvHelper;
+﻿using BudgetAnalyzer.Shared.Models;
+using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 
 namespace BudgetAnalyzer.CsvMapping
 {
-    public class TransactionMap : ClassMap<TransactionCsv>
+    public class TransactionMap : ClassMap<Transaction>
     {
         public TransactionMap() {
 
-            Map(m => m.DateOfTransaction).Name("Date");
-            Map(m => m.Amount).Name("Amount").TypeConverter<CustomDecimalConverter>();
+            Map(m => m.DateOfTransaction).Name("TransactionDate");
+            Map(m => m.AmountPaid).Name("AmountPaid").TypeConverter<CustomDecimalConverter>();
             Map(m => m.Description).Name("Description");
         }
     }

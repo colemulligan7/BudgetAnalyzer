@@ -1,0 +1,50 @@
+﻿@using BudgetAnalyzer.Shared.Models
+@using BudgetAnalyzer.Client.Data.Interfaces;
+@inject ITransactionService transactionService
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            Create Transaction Mapping
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" method="post" @onsubmit="Submit" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudTextField @bind-Value="@Model.Name" Label="Mapping Name" />
+            <MudTextField @bind-Value="@Model.AmountPaid" Label="Amount Paid" />
+            <MudTextField @bind-Value="@Model.AmountReceived" Label="Amount Received" />
+            <MudTextField @bind-Value="@Model.Description" Label="Description" />
+            <MudTextField @bind-Value="@Model.TransactionDate" Label="Transaction Date"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="Submit">Create Mapping</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public TransactionFileMapping Model { get; set; } = new TransactionFileMapping
+        {
+            Name = "",
+            TransactionDate = "",
+            Description = ""
+        };
+
+    bool success;
+    string[] errors = { };
+    MudForm form;
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Submit()
+    {
+        transactionService.CreateTransactionMapping(Model);
+
+    }
+}

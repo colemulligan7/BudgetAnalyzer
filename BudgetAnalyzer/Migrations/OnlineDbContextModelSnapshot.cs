@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BudgetAnalyzer.Migrations
 {
-    [DbContext(typeof(OnlineDbContext))]
+    [DbContext(typeof(ApplicationDbContext))]
     partial class OnlineDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -81,6 +81,28 @@ namespace BudgetAnalyzer.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("BudgetAnalyzer.Shared.Models.CategorySearch", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CategoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SearchTerm")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.ToTable("CategorySearch");
+                });
+
             modelBuilder.Entity("BudgetAnalyzer.Shared.Models.GoalRange", b =>
                 {
                     b.Property<long>("Id")
@@ -123,7 +145,11 @@ namespace BudgetAnalyzer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("MatchingTransactions")
+                        .HasColumnType("bit");
 
                     b.Property<int>("TransactionType")
                         .HasColumnType("int");
@@ -131,6 +157,37 @@ namespace BudgetAnalyzer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Transactions");
+                });
+
+            modelBuilder.Entity("BudgetAnalyzer.Shared.Models.TransactionFileMapping", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AmountPaid")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AmountReceived")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TransactionFileMappings");
                 });
 
             modelBuilder.Entity("BudgetAnalyzer.Shared.Models.User", b =>
@@ -185,6 +242,17 @@ namespace BudgetAnalyzer.Migrations
                         .HasForeignKey("ParentCategoryId");
 
                     b.Navigation("ParentCategory");
+                });
+
+            modelBuilder.Entity("BudgetAnalyzer.Shared.Models.CategorySearch", b =>
+                {
+                    b.HasOne("BudgetAnalyzer.Shared.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("BudgetAnalyzer.Shared.Models.GoalRange", b =>
